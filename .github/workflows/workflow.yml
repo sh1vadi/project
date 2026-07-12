@@ -8,6 +8,9 @@ on:
     branches:
       - develop
 
+permissions:
+  contents: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -37,3 +40,36 @@ jobs:
         with:
           name: coverage-report
           path: coverage.xml
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build step placeholder
+        run: echo "Building the application..."
+
+      - name: Add Badge to README
+        run: |
+          BADGE="[![CI/CD Pipeline](https://github.com/${{ github.repository }}/actions/workflows/workflow.yml/badge.svg)](https://github.com/${{ github.repository }}/actions/workflows/workflow.yml)"
+          
+          # Створюємо README.md, якщо його ще немає
+          if [ ! -f README.md ]; then
+            echo "# Project" > README.md
+          fi
+
+          # Перевіряємо, чи є вже бейдж. Якщо немає - додаємо
+          if ! grep -q "badge.svg" README.md; then
+            echo -e "$BADGE\n\n$(cat README.md)" > README.md
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add README.md
+            git commit -m "docs: Add build status badge [skip ci]"
+            git push
+          else
+            echo "Badge already in README.md. Skipping."
+          fi
