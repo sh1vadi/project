@@ -49,6 +49,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.head_ref }}
 
       - name: Build step placeholder
         run: echo "Building the application..."
@@ -57,12 +58,10 @@ jobs:
         run: |
           BADGE="[![CI/CD Pipeline](https://github.com/${{ github.repository }}/actions/workflows/workflow.yml/badge.svg)](https://github.com/${{ github.repository }}/actions/workflows/workflow.yml)"
           
-          # Створюємо README.md, якщо його ще немає
           if [ ! -f README.md ]; then
             echo "# Project" > README.md
           fi
 
-          # Перевіряємо, чи є вже бейдж. Якщо немає - додаємо
           if ! grep -q "badge.svg" README.md; then
             echo -e "$BADGE\n\n$(cat README.md)" > README.md
             git config --local user.email "action@github.com"
